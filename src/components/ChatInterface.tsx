@@ -276,19 +276,27 @@ export default function ChatInterface() {
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
+        let buffer = ''; // Búfer para acumular fragmentos de líneas
 
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            
+            // El último elemento de split() puede estar incompleto, lo guardamos para el siguiente chunk
+            buffer = lines.pop() || '';
 
             for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const dataStr = line.substring(6);
+              const trimmedLine = line.trim();
+              if (!trimmedLine || trimmedLine.startsWith(':')) continue; // Ignorar líneas vacías y pings (: ping)
+
+              if (trimmedLine.startsWith('data: ')) {
+                const dataStr = trimmedLine.substring(6);
                 if (dataStr === '[DONE]') break;
+                
                 try {
                   const data = JSON.parse(dataStr);
                   
@@ -304,13 +312,12 @@ export default function ChatInterface() {
                   const delta = data.choices?.[0]?.delta?.content || '';
                   fullText += delta;
 
-                  // Thinking logic [THINK]
+                  // Lógica de pensamiento [THINK]
                   if (fullText.includes('[THINK]')) {
                     const parts = fullText.split(/\[THINK\]|\[\/THINK\]/);
                     if (parts.length > 1) {
                       if (!thinkingMsg) {
                         thinkingMsg = { role: 'thinking', content: '' };
-                        // Insert thinking message before assistant message
                         updatedMessages.splice(updatedMessages.length - 1, 0, thinkingMsg);
                       }
                       thinkingMsg.content = parts[1];
@@ -324,7 +331,9 @@ export default function ChatInterface() {
                     ...prev,
                     [currentChatId]: { ...updatedChat, messages: [...updatedMessages] }
                   }));
-                } catch (e) {}
+                } catch (e) {
+                  console.warn('Error parseando línea del stream:', trimmedLine);
+                }
               }
             }
           }
