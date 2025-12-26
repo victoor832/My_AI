@@ -84,6 +84,14 @@ export default function ChatInterface() {
 
     // Check if already logged in (session-like)
     if (sessionStorage.getItem('isLoggedIn') === 'true') setIsLoggedIn(true);
+
+    // Mobile height fix
+    const setVh = () => {
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    setVh();
+    window.addEventListener('resize', setVh);
+    return () => window.removeEventListener('resize', setVh);
   }, []);
 
   useEffect(() => {
@@ -394,7 +402,7 @@ export default function ChatInterface() {
   const currentChat = currentChatId ? chats[currentChatId] : null;
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-[#0d0d0d] text-neutral-200">
+    <div className="flex h-[calc(var(--vh,1vh)*100)] w-full overflow-hidden bg-[#0d0d0d] text-neutral-200">
       {/* Sidebar Overlay */}
       <div 
         className={cn("sidebar-overlay", isSidebarOpen && "open")} 
@@ -406,7 +414,7 @@ export default function ChatInterface() {
         <div className="p-4 flex items-center justify-between">
           <button 
             onClick={createNewChat}
-            className="flex-1 py-2 px-4 bg-neutral-800 border border-neutral-700 rounded-lg text-sm font-medium text-white hover:bg-neutral-700 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 px-4 bg-neutral-800 border border-neutral-700 rounded-xl text-sm font-medium text-white hover:bg-neutral-700 transition-colors flex items-center justify-center gap-2"
           >
             <Plus size={16} /> Nuevo Chat
           </button>
@@ -415,7 +423,7 @@ export default function ChatInterface() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-2 space-y-1">
+        <div className="flex-1 overflow-y-auto px-2 space-y-1 custom-scrollbar">
           {Object.values(chats).sort((a, b) => b.created - a.created).map(chat => (
             <div 
               key={chat.id}
@@ -424,7 +432,7 @@ export default function ChatInterface() {
                 setIsSidebarOpen(false);
               }}
               className={cn(
-                "group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors",
+                "group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer text-sm transition-colors",
                 chat.id === currentChatId ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-400 hover:bg-neutral-800/50"
               )}
             >
@@ -439,14 +447,14 @@ export default function ChatInterface() {
           ))}
         </div>
 
-        <div className="p-4 border-t border-neutral-800 space-y-4 overflow-y-auto max-h-[50vh]">
-          <div className="flex items-center gap-2 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+        <div className="p-4 border-t border-neutral-800 space-y-4 overflow-y-auto max-h-[40vh] custom-scrollbar">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
             <SettingsIcon size={12} /> Configuración
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm">
-              <span>Streaming</span>
+              <span className="text-neutral-400">Streaming</span>
               <button 
                 onClick={() => setSettings(s => ({ ...s, stream: !s.stream }))}
                 className={cn(
@@ -462,7 +470,7 @@ export default function ChatInterface() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-[10px] text-neutral-500 uppercase">
+              <div className="flex justify-between text-[10px] text-neutral-500 uppercase font-bold">
                 <span>Temperatura</span>
                 <span>{settings.temperature}</span>
               </div>
@@ -475,12 +483,12 @@ export default function ChatInterface() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-neutral-500 uppercase">System Prompt</div>
+              <div className="text-[10px] text-neutral-500 uppercase font-bold">System Prompt</div>
               <textarea 
                 rows={2}
                 value={settings.systemPrompt}
                 onChange={(e) => setSettings(s => ({ ...s, systemPrompt: e.target.value }))}
-                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-xs text-white resize-none focus:outline-none focus:border-neutral-500"
+                className="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-2.5 text-xs text-white resize-none focus:outline-none focus:border-neutral-500"
                 placeholder="Instrucciones del sistema..."
               />
             </div>
@@ -489,30 +497,31 @@ export default function ChatInterface() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col relative w-full min-w-0">
+      <main className="flex-1 flex flex-col relative w-full min-w-0 h-full">
         {/* Header */}
-        <header className="h-14 border-b border-neutral-800 flex items-center px-4 md:px-6 justify-between bg-[#0d0d0d]/80 backdrop-blur-sm sticky top-0 z-10">
+        <header className="h-14 border-b border-neutral-800 flex items-center px-4 md:px-6 justify-between bg-[#0d0d0d]/80 backdrop-blur-md sticky top-0 z-10">
           <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 -ml-2 text-neutral-400 hover:text-white">
-              <Menu size={24} />
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 -ml-2 text-neutral-400 hover:text-white transition-colors">
+              <Menu size={22} />
             </button>
-            <h2 className="font-medium text-neutral-200 truncate max-w-37.5 sm:max-w-75">
-              {currentChat?.title || 'Nuevo Chat'}
-            </h2>
-            <div className="h-4 w-px bg-neutral-800 hidden sm:block" />
-            <select 
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-transparent text-xs text-neutral-500 border-none focus:ring-0 cursor-pointer hover:text-neutral-200 transition-colors max-w-37.5 sm:max-w-62.5 truncate outline-none"
-            >
-              {models.length > 0 ? (
-                models.map(m => <option key={m} value={m} className="bg-neutral-900">{m}</option>)
-              ) : (
-                <option value="">Cargando modelos...</option>
-              )}
-            </select>
+            <div className="flex flex-col min-w-0">
+              <h2 className="font-semibold text-neutral-200 truncate text-sm md:text-base">
+                {currentChat?.title || 'Nuevo Chat'}
+              </h2>
+              <select 
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="bg-transparent text-[10px] md:text-xs text-neutral-500 border-none p-0 focus:ring-0 cursor-pointer hover:text-neutral-300 transition-colors max-w-37.5 md:max-w-62.5 truncate outline-none"
+              >
+                {models.length > 0 ? (
+                  models.map(m => <option key={m} value={m} className="bg-neutral-900">{m}</option>)
+                ) : (
+                  <option value="">Cargando modelos...</option>
+                )}
+              </select>
+            </div>
           </div>
-          <div className="items-center gap-2 text-[10px] text-neutral-600 font-mono hidden xs:flex">
+          <div className="items-center gap-2 text-[10px] text-neutral-600 font-mono hidden sm:flex">
             <Zap size={10} /> LM STUDIO
           </div>
         </header>
@@ -520,29 +529,29 @@ export default function ChatInterface() {
         {/* Messages */}
         <div 
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 md:space-y-8 scroll-smooth"
+          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 md:space-y-8 scroll-smooth custom-scrollbar"
         >
           {currentChat?.messages.map((msg, i) => {
             if (msg.role === 'system') return null;
             if (msg.role === 'thinking' && !settings.showThinking) return null;
 
             return (
-              <div key={i} className={cn("flex", msg.role === 'user' ? "justify-end" : "justify-start")}>
+              <div key={i} className={cn("flex w-full", msg.role === 'user' ? "justify-end" : "justify-start")}>
                 {msg.role === 'thinking' ? (
-                  <div className="thinking-block max-w-2xl w-full">
+                  <div className="thinking-block max-w-[90%] md:max-w-2xl w-full">
                     {msg.content}
                   </div>
                 ) : (
                   <div className={cn(
-                    "max-w-3xl w-full",
+                    "max-w-[90%] md:max-w-3xl w-full",
                     msg.role === 'user' ? "message-user" : "message-assistant"
                   )}>
-                    <div className="text-[10px] font-bold mb-2 text-neutral-500 uppercase tracking-widest">
+                    <div className="text-[9px] md:text-[10px] font-bold mb-1.5 text-neutral-500 uppercase tracking-widest">
                       {msg.role === 'user' ? 'Tú' : 'Asistente'}
                     </div>
                     
                     {msg.images && msg.images.map((img, idx) => (
-                      <img key={idx} src={img} alt="Upload" className="max-w-sm rounded-lg mb-4 border border-neutral-800 shadow-lg" />
+                      <img key={idx} src={img} alt="Upload" className="max-w-full sm:max-w-sm rounded-xl mb-4 border border-neutral-800 shadow-lg" />
                     ))}
                     
                     {msg.hadImages && !msg.images && (
@@ -556,16 +565,18 @@ export default function ChatInterface() {
                           code({node, inline, className, children, ...props}: any) {
                             const match = /language-(\w+)/.exec(className || '');
                             return !inline && match ? (
-                              <SyntaxHighlighter
-                                style={vscDarkPlus as any}
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).replace(/\n$/, '')}
-                              </SyntaxHighlighter>
+                              <div className="my-4 rounded-xl overflow-hidden border border-neutral-800">
+                                <SyntaxHighlighter
+                                  style={vscDarkPlus as any}
+                                  language={match[1]}
+                                  PreTag="div"
+                                  {...props}
+                                >
+                                  {String(children).replace(/\n$/, '')}
+                                </SyntaxHighlighter>
+                              </div>
                             ) : (
-                              <code className={className} {...props}>
+                              <code className={cn("bg-neutral-800 px-1.5 py-0.5 rounded text-neutral-200", className)} {...props}>
                                 {children}
                               </code>
                             );
@@ -582,28 +593,31 @@ export default function ChatInterface() {
           })}
           {isGenerating && (
             <div className="flex justify-start">
-              <div className="flex gap-1 items-center text-neutral-500 text-xs animate-pulse">
-                <div className="w-1 h-1 bg-neutral-500 rounded-full" />
-                <div className="w-1 h-1 bg-neutral-500 rounded-full" />
-                <div className="w-1 h-1 bg-neutral-500 rounded-full" />
+              <div className="flex gap-1.5 items-center text-neutral-500 text-xs animate-pulse bg-neutral-900/50 px-3 py-1.5 rounded-full border border-neutral-800">
+                <div className="flex gap-1">
+                  <div className="w-1 h-1 bg-neutral-500 rounded-full" />
+                  <div className="w-1 h-1 bg-neutral-500 rounded-full" />
+                  <div className="w-1 h-1 bg-neutral-500 rounded-full" />
+                </div>
                 <span>Generando...</span>
               </div>
             </div>
           )}
+          <div className="h-4" /> {/* Spacer for bottom */}
         </div>
 
         {/* Input Area */}
-        <div className="p-4 md:p-6 bg-linear-to-t from-[#0d0d0d] via-[#0d0d0d] to-transparent">
+        <div className="p-3 md:p-6 bg-linear-to-t from-[#0d0d0d] via-[#0d0d0d] to-transparent">
           <div className="max-w-3xl mx-auto relative">
             {/* File Previews */}
             {uploadedFiles.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {uploadedFiles.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 px-2 py-1 rounded-lg text-[10px] text-neutral-300">
+                  <div key={i} className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 px-2.5 py-1.5 rounded-xl text-[10px] text-neutral-300 shadow-sm">
                     <span>{f.type === 'image' ? '🖼️' : '📄'} {f.name}</span>
                     <button 
                       onClick={() => setUploadedFiles(prev => prev.filter((_, idx) => idx !== i))}
-                      className="text-neutral-500 hover:text-red-400"
+                      className="text-neutral-500 hover:text-red-400 transition-colors"
                     >
                       <X size={12} />
                     </button>
@@ -612,7 +626,7 @@ export default function ChatInterface() {
               </div>
             )}
 
-            <div className="border border-neutral-800 rounded-2xl bg-[#1a1a1a] shadow-2xl focus-within:border-neutral-600 transition-all overflow-hidden">
+            <div className="border border-neutral-800 rounded-2xl bg-[#141414] shadow-2xl focus-within:border-neutral-700 transition-all overflow-hidden">
               <textarea 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -627,17 +641,19 @@ export default function ChatInterface() {
                 rows={1}
               />
               
-              <div className="flex items-center justify-between px-4 pb-3">
-                <div className="flex gap-1">
+              <div className="flex items-center justify-between px-3 pb-3">
+                <div className="flex gap-0.5">
                   <button 
                     onClick={() => imageInputRef.current?.click()}
-                    className="p-2 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 rounded-xl transition-all"
+                    className="p-2.5 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 rounded-xl transition-all"
+                    title="Subir imagen"
                   >
                     <ImageIcon size={20} />
                   </button>
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 rounded-xl transition-all"
+                    className="p-2.5 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 rounded-xl transition-all"
+                    title="Subir archivo"
                   >
                     <Paperclip size={20} />
                   </button>
@@ -645,13 +661,31 @@ export default function ChatInterface() {
                 <button 
                   onClick={sendMessage}
                   disabled={(!input.trim() && uploadedFiles.length === 0) || isGenerating}
-                  className="bg-white text-black px-4 py-2 rounded-xl font-semibold text-sm hover:bg-neutral-200 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                  className="bg-white text-black h-10 px-4 rounded-xl font-bold text-sm hover:bg-neutral-200 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg"
                 >
-                  {isGenerating ? '...' : <><Send size={16} /> Enviar</>}
+                  {isGenerating ? (
+                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  ) : (
+                    <><Send size={16} /><span className="hidden xs:inline">Enviar</span></>
+                  )}
                 </button>
               </div>
             </div>
-            <p className="text-[10px] text-center text-neutral-700 mt-3 hidden md:block">
+            <p className="text-[9px] text-center text-neutral-700 mt-3 hidden sm:block">
+              LM Studio puede cometer errores. Verifica la información importante.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+              LM Studio puede cometer errores. Verifica la información importante.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
               LM Studio puede cometer errores. Revisa la información importante.
             </p>
           </div>
