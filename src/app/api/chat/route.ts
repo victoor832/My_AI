@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      // Aumentamos el timeout para dar tiempo a que el modelo cargue en el PC Server
+      signal: AbortSignal.timeout(120000) // 2 minutos
     });
 
     if (!response.ok) {

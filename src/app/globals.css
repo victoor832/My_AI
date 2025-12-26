@@ -84,5 +84,25 @@ body {
   background-color: #1a1a1a;
   border: 1px solid #333;
   padding: 1rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
+
+.message-assistant {
+  padding: 0.5rem 0;
+}
+
+.prose pre {
+  background: #171717 !important;
+  border: 1px solid #262626;
+  border-radius: 0.75rem;
+  margin: 1rem 0;
+}
+
+.prose code {
+  background: rgba(255,255,255,0.05);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+

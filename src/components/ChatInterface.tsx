@@ -108,13 +108,23 @@ export default function ChatInterface() {
   }, [chats, currentChatId, isGenerating]);
 
   // --- Actions ---
-  const handleLogin = () => {
-    // Simple password check (you can change this)
-    if (password === 'admin123') {
-      setIsLoggedIn(true);
-      sessionStorage.setItem('isLoggedIn', 'true');
-    } else {
-      alert('Contraseña incorrecta');
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      if (response.ok) {
+        setIsLoggedIn(true);
+        sessionStorage.setItem('isLoggedIn', 'true');
+      } else {
+        alert('Contraseña incorrecta');
+      }
+    } catch (error) {
+      console.error('Error en el login:', error);
+      alert('Error al conectar con el servidor');
     }
   };
 
