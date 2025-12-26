@@ -677,20 +677,6 @@ export default function ChatInterface() {
           </div>
         </div>
       </main>
-    </div>
-  );
-              LM Studio puede cometer errores. Verifica la información importante.
-            </p>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-              LM Studio puede cometer errores. Revisa la información importante.
-            </p>
-          </div>
-        </div>
-      </main>
 
       {/* Hidden Inputs */}
       <input 
