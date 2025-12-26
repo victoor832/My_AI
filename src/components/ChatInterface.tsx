@@ -291,7 +291,17 @@ export default function ChatInterface() {
                 if (dataStr === '[DONE]') break;
                 try {
                   const data = JSON.parse(dataStr);
-                  const delta = data.choices[0].delta.content || '';
+                  
+                  if (data.error) {
+                    assistantMsg.content = `Error: ${data.error}. ${data.details || ''}`;
+                    setChats(prev => ({
+                      ...prev,
+                      [currentChatId]: { ...updatedChat, messages: [...updatedMessages] }
+                    }));
+                    break;
+                  }
+
+                  const delta = data.choices?.[0]?.delta?.content || '';
                   fullText += delta;
 
                   // Thinking logic [THINK]
